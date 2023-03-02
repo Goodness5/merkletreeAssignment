@@ -1,4 +1,5 @@
 import csv
+from prettytable import PrettyTable
 
 data = [    ['0x2bea82919980E15B2528f42a40829D7294E239c6', 1000],
     ['0x87d37b9B303b4b0F23cc7420b8431Fdd5FA17e62', 1000],
@@ -12,7 +13,13 @@ data = [    ['0x2bea82919980E15B2528f42a40829D7294E239c6', 1000],
     ['0x1990bBC7bF55Ca3836910Bb8064AF5AEA1aa3990', 1000]
 ]
 
-with open('airdrop.csv', 'w', newline='') as file:
+table = PrettyTable()
+table.field_names = ["Address", "Amount"]
+for row in data:
+    table.add_row(row)
+
+with open("airdrop_table.csv", "w") as file:
     writer = csv.writer(file)
-    writer.writerow(['address', 'amount'])
-    writer.writerows(data)
+    writer.writerow(table.field_names)
+    for row in table:
+        writer.writerow(row)
