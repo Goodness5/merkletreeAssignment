@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-contract Name {
+contract Airdrop {
     bytes32 public merkleRoot;
 
     constructor(bytes32 root) {
@@ -30,8 +30,7 @@ contract Name {
         claimers[_claimer].amount = _amount;
         claimers[_claimer].claimed = true;
 
-        // Transfer the tokens to the claimer
-        // ...
+      
 
         return true;
     }
