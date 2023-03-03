@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 contract Airdrop {
     bytes32 public merkleRoot;
@@ -26,20 +27,28 @@ contract Airdrop {
     mapping(address => Claimer) public claimers;
 
     function claimAirdrop(address _claimer, uint256 _amount) external returns (bool _claimed) {
-    require(!claimers[_claimer].claimed, "Already claimed");
+        require(!claimers[_claimer].claimed, "Already claimed");
 
-    // Generate proof for the claimer
-    bytes32 leaf = keccak256(abi.encodePacked(_claimer, _amount));
-    // bytes32[] memory proof = tree.getProof(leaf);
+        // Generate proof for the claimer
+        bytes32 leaf = keccak256(abi.encodePacked(_claimer, _amount));
+        bytes32[] memory proofBytes32 = tree.getProof(leaf);
 
-    // require(checkClaim(_claimer, _amount, proof), "Invalid proof");
+        // Convert the proof to a bytes32[] array
+        uint256 proofLength = proofBytes32.length;
+        bytes32[] memory proof = new bytes32[](proofLength);
+        for (uint256 i = 0; i < proofLength; i++) {
+            proof[i] = proofBytes32[i];
+        }
 
-    // Update claimer's state
-    claimers[_claimer].amount = _amount;
-    claimers[_claimer].claimed = true;
+        // Verify the proof
+        require(MerkleProof.verify(proof, merkleRoot, leaf), "Invalid proof");
 
-    return true;
-}
+        // Update claimer's state
+        claimers[_claimer].amount = _amount;
+        claimers[_claimer].claimed = true;
+
+        return true;
+    }
 
 function checkClaim(address _claimer, uint256 _amount, bytes32[] memory _proof) public view returns (bool) {
     bytes32 leaf = keccak256(abi.encodePacked(_claimer, _amount));
