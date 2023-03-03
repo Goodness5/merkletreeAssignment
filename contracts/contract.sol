@@ -4,14 +4,15 @@ pragma solidity ^0.8.9;
 contract Name {
     bytes32 public merkleRoot;
 
-    constructor() {
+    constructor(bytes32 root) {
         // Read the Merkle root from the JSON file
         // string memory rootJson = type(Name).creationCode;
         // bytes memory rootData = abi.encodePacked(bytes(rootJson)[108:140]);
 
-    //     assembly {
-    //         merkleRoot := mload(add(rootData, 32))
-    //     }
+        // assembly {
+        //     merkleRoot := mload(add(rootData, 32))
+        // }
+    merkleRoot = root;
     }
 
     // State variables
