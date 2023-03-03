@@ -1,45 +1,54 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-contract Airdrop {
-    
+contract Name {
+    bytes32 public merkleRoot;
+
+    constructor() {
+        // Read the Merkle root from the JSON file
+        // string memory rootJson = type(Name).creationCode;
+        // bytes memory rootData = abi.encodePacked(bytes(rootJson)[108:140]);
+
+    //     assembly {
+    //         merkleRoot := mload(add(rootData, 32))
+    //     }
+    }
+
     // State variables
+    
     struct Claimer {
-        uint amount;
+        uint256 amount;
         bool claimed;
     }
-    mapping (address => Claimer) public claimers;
-    bytes32 public merkleRoot;
-    
-    // Constructor to set the merkle root
-    constructor(bytes32 _merkleRoot) {
-        merkleRoot = _merkleRoot;
+    mapping(address => Claimer) public claimers;
+
+    function claimAirdrop(address _claimer, uint256 _amount, bytes32[] memory _proof) external returns (bool _claimed) {
+        require(!claimers[_claimer].claimed, "Already claimed");
+        require(checkClaim(_claimer, _amount, _proof), "Invalid proof");
+
+        claimers[_claimer].amount = _amount;
+        claimers[_claimer].claimed = true;
+
+        // Transfer the tokens to the claimer
+        // ...
+
+        return true;
     }
-    
-    // Function to claim the airdrop
-    function claimAirdrop(bytes32[] memory _proof) public {
-        require(!claimers[msg.sender].claimed, "Airdrop already claimed");
-        require(_verifyProof(_proof, msg.sender), "Invalid proof");
-        claimers[msg.sender].claimed = true;
-        claimers[msg.sender].amount = 1000; // Set the amount of the airdrop for the claimer
-        // ...transfer tokens to the claimer's address
-    }
-    
-    // Function to verify the merkle proof
-    function _verifyProof(bytes32[] memory _proof, address _claimer) internal view returns (bool) {
-        bytes32 leaf = keccak256(abi.encodePacked(_claimer));
+
+    function checkClaim(address _claimer, uint256 _amount, bytes32[] memory _proof) public view returns (bool) {
+        bytes32 leaf = keccak256(abi.encodePacked(_claimer, _amount));
         bytes32 currentHash = leaf;
-    
+
         for (uint256 i = 0; i < _proof.length; i++) {
             bytes32 proofElement = _proof[i];
-    
+
             if (currentHash < proofElement) {
                 currentHash = keccak256(abi.encodePacked(currentHash, proofElement));
             } else {
                 currentHash = keccak256(abi.encodePacked(proofElement, currentHash));
             }
         }
-    
+
         return currentHash == merkleRoot;
     }
 }
