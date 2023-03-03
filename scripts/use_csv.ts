@@ -37,4 +37,4 @@ fs.writeFileSync("airdrop_data.json", airdropDataJson, "utf-8");
 // Deploy the root hash to the smart contract
 const rootHash = tree.getRoot().toString("hex");
 console.log(rootHash);
-// ...deploy rootHash to the smart contract
+
