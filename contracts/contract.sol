@@ -26,46 +26,22 @@ contract Airdrop {
     }
     mapping(address => Claimer) public claimers;
 
-    function claimAirdrop(address _claimer, uint256 _amount) external returns (bool _claimed) {
-        require(!claimers[_claimer].claimed, "Already claimed");
+function claimAirdrop(address _claimer, uint256 _amount) external returns (bool _claimed) {
+    require(!claimers[_claimer].claimed, "Already claimed");
 
-        // Generate proof for the claimer
-        bytes32 leaf = keccak256(abi.encodePacked(_claimer, _amount));
-        bytes32[] memory proofBytes32 = tree.getProof(leaf);
-
-        // Convert the proof to a bytes32[] array
-        uint256 proofLength = proofBytes32.length;
-        bytes32[] memory proof = new bytes32[](proofLength);
-        for (uint256 i = 0; i < proofLength; i++) {
-            proof[i] = proofBytes32[i];
-        }
-
-        // Verify the proof
-        require(MerkleProof.verify(proof, merkleRoot, leaf), "Invalid proof");
-
-        // Update claimer's state
-        claimers[_claimer].amount = _amount;
-        claimers[_claimer].claimed = true;
-
-        return true;
-    }
-
-function checkClaim(address _claimer, uint256 _amount, bytes32[] memory _proof) public view returns (bool) {
     bytes32 leaf = keccak256(abi.encodePacked(_claimer, _amount));
-    bytes32 currentHash = leaf;
 
-    for (uint256 i = 0; i < _proof.length; i++) {
-        bytes32 proofElement = _proof[i];
+    // Verify the proof
+    require(MerkleProof.verify(proof, merkleRoot, leaf), "Invalid proof");
 
-        if (currentHash < proofElement) {
-            currentHash = keccak256(abi.encodePacked(currentHash, proofElement));
-        } else {
-            currentHash = keccak256(abi.encodePacked(proofElement, currentHash));
-        }
-    }
+    // Update claimer's state
+    claimers[_claimer].amount = _amount;
+    claimers[_claimer].claimed = true;
 
-    // Compare the calculated root hash with the stored root hash
-    return currentHash == merkleRoot;
+    return true;
 }
+
+
+
 
 }

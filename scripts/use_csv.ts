@@ -67,6 +67,10 @@ const merkleTree = await merkleTreeFactory.deploy(rootHashHex, proofs);
 await merkleTree.deployed();
 
 console.log("Airdrop contract deployed to:", merkleTree.address);
+const claimer = "0x87d37b9B303b4b0F23cc7420b8431Fdd5FA17e62";
+
+const claim = await merkleTree.claimAirdrop(claimer, 1000);
+console.log(claim);
 
 }
 main()
