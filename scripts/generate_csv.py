@@ -13,20 +13,12 @@ data = [    ['0x2bea82919980E15B2528f42a40829D7294E239c6', 1000],
     ['0x1990bBC7bF55Ca3836910Bb8064AF5AEA1aa3990', 1000]
 ]
 
-# headers = ["Address", "Amount"]
 
-# csvfile = (tabulate(data, headers=headers))
- 
-# table = PrettyTable()
-# table.field_names = ["Address", "Amount"]
-# for row in data:
-#     table.add_row(row)
 table = PrettyTable()
 table.field_names = ["Address", "Amount"]
 for row in data:
     table.add_row(row)
 
-# Write the PrettyTable object to a new CSV file
 with open("formatted_data.csv", "w", newline="") as csvfile:
     csvfile.write(table.get_csv_string())
 
