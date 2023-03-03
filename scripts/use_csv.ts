@@ -2,6 +2,8 @@ import * as fs from "fs";
 import { MerkleTree } from "merkletreejs";
 import { keccak256 } from "js-sha3";
 import { ethers } from "hardhat";
+import { BytesLike } from "ethers";
+
 
 interface AirdropData {
   address: string;
@@ -39,22 +41,37 @@ async function main() {
   // Deploy the root hash to the smart contract
   const rootHash = tree.getRoot().toString("hex");
   console.log(rootHash);
+  const rootHashHex = "0x" + Buffer.from(rootHash, "hex").toString("hex");
+  console.log(rootHashHex);
 
-  const merkleTreeFactory = await ethers.getContractFactory("Airdrop");
-  const merkleTree = await merkleTreeFactory.deploy(rootHash);
-  await merkleTree.deployed();
+ // Loop through the airdrop data and generate proof for each address
+ const proofs = airdropData.flatMap((data) => {
+  const proof = tree.getProof(
+    Buffer.from(
+      keccak256(`${data.address.toLowerCase()}${data.amount.toString()}`),
+      "hex"
+    )
+  );
 
-  console.log("MerkleTree contract deployed to:", merkleTree.address);
+  // Convert the proof to an array of strings representing bytes32 values
+  return proof.map((p) => "0x" + p.data.toString("hex"));
+});
+
+
+
+
+console.log(proofs);
+
+const merkleTreeFactory = await ethers.getContractFactory("Airdrop");
+const merkleTree = await merkleTreeFactory.deploy(rootHashHex, proofs);
+await merkleTree.deployed();
+
+console.log("Airdrop contract deployed to:", merkleTree.address);
+
 }
-
-
-
 main()
-    .then(() => process.exit(0))
-    .catch(error => {
-        console.error(error);
-        process.exit(1);
-    });
-
-
-
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
