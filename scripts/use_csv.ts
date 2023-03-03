@@ -1,18 +1,17 @@
 import * as fs from "fs";
 import { MerkleTree } from "merkletreejs";
-import { keccak256 } from "crypto-js";
+import { keccak256 } from "js-sha3";
 
 interface AirdropData {
   address: string;
   amount: number;
 }
 
-// Read the CSV file and parse its contents into an array of AirdropData objects
-const csvData: string = fs.readFileSync("airdrop_data.csv", "utf-8");
+const csvData: string = fs.readFileSync("airdrop.csv", "utf-8");
 const airdropData: AirdropData[] = csvData
   .trim()
   .split("\n")
-  .slice(1) // Skip header row
+  .slice(1)
   .map((row) => {
     const [address, amount] = row.split(",");
     return { address, amount: parseInt(amount) };
@@ -22,13 +21,13 @@ const airdropData: AirdropData[] = csvData
 const leaves = airdropData.map((data) => {
   const hash = keccak256(
     `${data.address.toLowerCase()}${data.amount.toString()}`
-  ).toString("hex");
+  );
   return Buffer.from(hash, "hex");
 });
-const tree = new MerkleTree(leaves, keccak256);
+const tree = new MerkleTree(leaves, keccak256, { sortPairs: true });
 
 // Write the Merkle tree to a JSON file
-const treeData = JSON.stringify(tree.toJSON(), null, 2);
+const treeData = JSON.stringify(tree.getHexLeaves(), null, 2);
 fs.writeFileSync("merkle_tree.json", treeData, "utf-8");
 
 // Write the airdrop data to a JSON file
